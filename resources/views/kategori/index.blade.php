@@ -13,6 +13,9 @@
             <div class="card-body">
                 {{ $dataTable->table() }}
             </div>
+            <div class="card-footer">
+                <a class="btn btn-primary" href="{{ route('kategori.create') }}">+ Tambah Kategori</a>
+            </div>
         </div>
     </div>
 @endsection

@@ -23,12 +23,21 @@
     @endif
 @stop
 
+@section('content_top_nav_right')
+    {{-- Menu for manage kategori --}}
+    <li class="nav-item">
+        <a href="/kategori" class="nav-link">
+            <h6>Manage Kategori</h6>
+        </a>
+    </li>
+@stop 
+
 {{-- Rename section content to content_body --}}
 @section('content')
     @yield('content_body')
 @stop
 
-{{-- Create a common footer --}}
+{{-- Create a common footer
 @section('footer')
     <div class="float-right">
         Version: {{ config('app.version', '1.0.0') }}
@@ -39,7 +48,7 @@
             {{ config('app.company_name', 'My company') }}
         </a>
     </strong>
-@stop
+@stop --}}
 
 {{-- Add common Javascript/Jquery code --}}
 @push('js')
