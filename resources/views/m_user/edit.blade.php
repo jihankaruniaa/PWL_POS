@@ -7,7 +7,7 @@
             <h2>Edit User</h2>
         </div>
         <div class="float-right">
-            <a class="btn btn-secondary" href="{{ route('m_user.index') }}">Kembali</a>
+            <a class="btn btn-secondary" href="{{ route('m_user.index') }}" style="background-color: #0084ff; color: white;">Kembali</a>
         </div>
     </div>
 </div>

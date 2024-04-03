@@ -7,35 +7,45 @@
             <h2>Show User</h2>
         </div>
         <div class="float-right">
-            <a class="btn btn-secondary" href="{{ route('m_user.index') }}">Kembali</a>
+            <a class="btn btn-secondary" href="{{ route('m_user.index') }}" style="background-color: #0084ff; color: white;">Kembali</a>        
         </div>
     </div>
 </div>
 
 <div class="row">
-    <div class="col-xs-12 col-sm-12 col-md-12">
-        <div class="form-group">
-            <strong>User_id:</strong> {{ $useri->user_id }}
+    <!-- /.card-header -->
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <strong>User ID</strong>
+                <p class="text-muted">{{ $useri->user_id }}</p>
+            </div>
+            <div class="col-md-6">
+                <strong>Level ID</strong>
+                <p class="text-muted">{{ $useri->level_id }}</p>
+            </div>
         </div>
-    </div>
-    <div class="col-xs-12 col-sm-12 col-md-12">
-        <div class="form-group">
-            <strong>Level_id:</strong> {{ $useri->level_id }}
+  
+        <hr>
+  
+        <div class="row">
+            <div class="col-md-6">
+                <strong>Username</strong>
+                <p class="text-muted">{{ $useri->username }}</p>
+            </div>
+            <div class="col-md-6">
+                <strong>Nama</strong>
+                <p class="text-muted">{{ $useri->nama }}</p>
+            </div>
         </div>
-    </div>
-    <div class="col-xs-12 col-sm-12 col-md-12">
-        <div class="form-group">
-            <strong>Username:</strong> {{ $useri->username }}
-        </div>
-    </div>
-    <div class="col-xs-12 col-sm-12 col-md-12">
-        <div class="form-group">
-            <strong>Nama:</strong> {{ $useri->nama }}
-        </div>
-    </div>
-    <div class="col-xs-12 col-sm-12 col-md-12">
-        <div class="form-group">
-            <strong>Password:</strong> {{ $useri->password }}
+  
+        <hr>
+  
+        <div class="row">
+            <div class="col-md-12">
+                <strong>Password</strong>
+                <p class="text-muted">{{ $useri->password }}</p>
+            </div>
         </div>
     </div>
 </div>

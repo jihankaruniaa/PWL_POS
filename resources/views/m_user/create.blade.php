@@ -7,7 +7,7 @@
             <h2>Membuat Daftar User</h2>
         </div>
         <div class="float-right">
-            <a class="btn btn-secondary" href="{{ route('m_user.index') }}"> Kembali</a>
+            <a class="btn btn-secondary" href="{{ route('m_user.index') }}" style="background-color: #0084ff; color: white;">Kembali</a>
         </div>
     </div>
 </div>
@@ -44,7 +44,12 @@
             <input type="password" name="password" class="form-control" placeholder="Masukkan password">
         </div>
     </div>
-
+    <div class="col-xs-12 col-sm-12 col-md-12">
+        <div class="form-group">
+            <strong>Level ID:</strong>
+            <input type="text" name="level_id" class="form-control" placeholder="Masukkan level id">
+        </div>
+    </div>
     <div class="col-xs-12 col-sm-12 col-md-12 text-center">
         <button type="submit" class="btn btn-primary">Submit</button>
     </div>
