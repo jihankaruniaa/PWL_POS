@@ -11,7 +11,7 @@
             <h3 class="card-title">Form Tambah Level</h3>
             </div>
 
-            <form method="post" action="store">
+            <form method="post" action="/store">
                 <div class="card-body">
                     <div class="form-group">
                         <label for="kodeLevel">Kode Level</label>

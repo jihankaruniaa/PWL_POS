@@ -31,4 +31,9 @@ Route::get('/kategori/edit/{id}', [KategoriController::class, 'edit'])->name('ka
 Route::post('/kategori/update/{id}', [KategoriController::class, 'update'])->name('kategori.update');
 Route::get('/kategori/delete/{id}', [KategoriController::class, 'delete'])->name('kategori.delete');
 
-Route::get('/level/tambah', [UserController::class, 'tambah'])->name('level.tambah');
+Route::get('/level/create', [LevelController::class, 'create']);
+Route::post('/level/store', [LevelController::class, 'store']);
+Route::get('/level', [LevelController::class, 'index']);
+Route::get('/level/edit/{id}', [LevelController::class, 'edit']);
+Route::put('/level/{id}', [LevelController::class, 'storeEdit']);
+Route::get('/level/hapus/{id}', [LevelController::class, 'hapus']);

@@ -1,39 +1,55 @@
 <?php
+
 namespace App\Http\Controllers;
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use App\Http\Requests\StorePostRequest;
+use App\DataTables\LevelDataTable;
+use App\Models\LevelModel;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Redirect;
 
-
-class levelController extends Controller
+class LevelController extends Controller
 {
-    public function index()
-    {
-        // DB::insert('insert into m_level (level_kode, level_nama, created_at) values (?, ?, ?)', ['CUS', 'Pelanggan', now()]);
-        //  return 'Insert data baru berhasil';
-        // $row = DB::update('update m_level set level_nama = ?, updated_at = ? where level_kode = ?', ['Customer', now(), 'CUS']);
-        // return 'Update data berhasil. Jumlah data yang diupdate: ' . $row . ' baris';
-         // Melakukan penghapusan data berdasarkan level_kode
-    //      $row = DB::delete('delete from m_level where level_kode = ?', ['CUS']);
-        
-    //      // Mengembalikan pesan konfirmasi bahwa data berhasil dihapus
-    //      return 'Delete data berhasil. Jumlah data yang dihapus: ' . $row . ' baris';
-        $data = DB::select('select * from m_level');
-        return view('level', ['data' => $data]);
-}
-public function tambah()
-    {
-        return view('level_tambah');
+    public function index(LevelDataTable $dataTable){
+        return $dataTable->render('level.index');
     }
 
-public function tambah_simpan(StorePostRequest $request)
-    {
-        DB::insert('insert into m_level (level_kode, level_nama, created_at) values (?, ?, ?)', [$request->kodeLevel, $request->namaLevel, now()]);
-        return redirect('/level');
+    public function create(){
+        return view('level.create');
+    }
 
-        $validated = $request->validate();
-        $validated = $request->safe()->only(['level_kode', 'level_nama']);
-        $validated = $request->safe()->except(['level_kode', 'level_nama']);
+    public function store(Request $request):RedirectResponse{
+        $validated = $request->validate([
+            'level_kode' => 'bail|required|unique:post|max:255',
+            'level_nama' => 'bail|required|unique:post|max:255',
+        ]);
+        levelModel::create([
+            'level_kode' =>$request->kodelevel,
+            'level_nama' =>$request->namalevel,
+        ]);
+        return redirect('/level');
+    }
+
+    public function edit($id){
+        $level = levelModel::find($id);
+        return view('level.edit', ['data' => $level]);
+    }
+
+    public function storeEdit(Request $request, $id){
+        $level = levelModel::find($id);
+
+        $level->level_kode = $request->kodelevel;
+        $level->level_nama = $request->namalevel;
+        $level->save();
+
+        return redirect('/level');
+    }
+
+    public function hapus($id){
+        $level = LevelModel::find($id);
+        $level->delete($id);
+
         return redirect('/level');
     }
 }
