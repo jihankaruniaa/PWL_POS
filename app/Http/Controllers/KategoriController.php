@@ -1,9 +1,9 @@
 <?php
-
 namespace App\Http\Controllers;
 use App\Models\KategoriModel;
 use Illuminate\Http\Request;
 use App\DataTables\KategoriDataTable;
+use App\Http\Requests\StorePostRequest;
 use Illuminate\Http\RedirectResponse;
 
 class KategoriController extends Controller
@@ -18,38 +18,53 @@ class KategoriController extends Controller
         return view('kategori.create');
     }
 
-    public function store(Request $request):RedirectResponse{
-        $validated = $request->validate([
-            'kategori_kode' => 'bail|required|unique:post|max:255',
-            'kategori_nama' => 'bail|required|unique:post|max:255',
-        ]);
-        KategoriModel::create([
-            'kategori_kode' => $request->kodeKategori,
-            'namaKategori' => $request->namaKategori,
-        ]);
-        //The post is valid
+    // public function store(Request $request)
+    // {
+    //     KategoriModel::create([
+    //         'kategori_kode' => $request->kodeKategori,
+    //         'kategori_nama' => $request->namaKategori,
+    //     ]);
+
+    //     return redirect('/kategori');
+    // }
+
+    public function store(StorePostRequest $request):RedirectResponse
+    {
+        // $validate = $request->validate(
+        //     [
+        //         'kodeKategori' => 'bail|required|max:5|unique:m_kategori,kategori_kode',
+        //         'namaKategori' => 'required'
+        //     ]
+        // );
+        $validated = $request->validated();
+
+        $validated = $request->safe()->only(['kategori_kode', 'kategori_nama']);
+        $validated = $request->safe()->except(['kategori_kode', 'kategori_nama']);
+
         return redirect('/kategori');
+    }
+    public function delete($id)
+    {
+        $kategori = KategoriModel::find($id);
+        if (!$kategori) {
+            abort(404);
+        }
+        $kategori->delete();
+        return redirect()->route('kategori.index')->with('success', 'Kategori berhasil dihapus');
     }
 
     public function edit($id)
     {
         $kategori = KategoriModel::find($id);
-        return view('kategori.edit', ['kategori' => $kategori]);
+        return view('kategori.edit', compact('kategori'));
     }
 
     public function update(Request $request, $id)
     {
         $kategori = KategoriModel::find($id);
-        $kategori->kategori_kode = $request->kodeKategori;
-        $kategori->kategori_nama = $request->namaKategori;
+        $kategori->kategori_kode = $request->kategori_kode;
+        $kategori->kategori_nama = $request->kategori_nama;
         $kategori->save();
-        return redirect('/kategori');
-    }
-
-    public function delete($id)
-    {
-        $kategori = KategoriModel::find($id);
-        $kategori->delete();
-        return redirect('/kategori');
+        return redirect('/kategori')->with('success', 'Kategori berhasil diupdate');
     }
 }
