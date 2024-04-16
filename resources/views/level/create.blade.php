@@ -1,46 +1,57 @@
-@extends('layouts.app')
-{{-- Customize layout sections --}}
-@section('subtitle', 'Level')
-@section('content_header_title', 'Level')
-@section('content_header_subtitle', 'Add Level')
-{{-- Content body: main page content --}}
+@extends('layouts.template')
+
 @section('content')
-    <div class="container">
-        <div class="card card-primary">
-            <div class="card-header">
-            <h3 class="card-title">Form Tambah Level</h3>
-            </div>
-
-            <form method="post" action="/store">
-                <div class="card-body">
-                    <div class="form-group">
-                        <label for="kodeLevel">Kode Level</label>
-                        <input id="level_kode"
-                            type="text" 
-                            name="level_kode"
-                            class="@error('level_kode') is-invalid @enderror"  placeholder="Masukkan Kode Level">
-
-                            @error('level_kode')
-                                <div class="alert alert-danger">{{ $message }}</div>
-                            @enderror
-                    </div>
-                    <div class="form-group">
-                        <label for="namaLevel">Nama Level</label>
-                        <input id="level_nama"
-                            type="text" 
-                            name="level_nama"
-                            class="@error('level_nama') is-invalid @enderror"  placeholder="Masukkan Nama Level">
-
-                            @error('level_nama')
-                                <div class="alert alert-danger">{{ $message }}</div>
-                            @enderror
-                    </div>
-                </div>
-
-                <div class="card-footer">
-                <button type="submit" class="btn btn-primary">Submit</button>
-                </div>
-            </form>
-        </div>  
+<div class="card card-outline card-primary">
+    <div class="card-header">
+        <h3 class="card-title">{{ $page->title }}</h3>
+        <div class="card-tools"></div>
     </div>
+    <div class="card-body">
+        <form method="POST" action="{{ url('level') }}" class="form-horizontal">
+            @csrf
+            <div class="form-group row">
+                <label class="col-1 control-label col-form-label">Level Kode</label>
+                <div class="col-11">
+                    <input type="text" class="form-control" id="level_kode" name="level_kode" value="{{ old('level_kode') }}" required>
+                    @error('level_kode')
+                    <small class="form-text text-danger">{{ $message }}</small>
+                    @enderror
+                </div>
+            </div>
+            <div class="form-group row">
+                <label class="col-1 control-label col-form-label">Level Nama</label>
+                <div class="col-11">
+                    <input type="text" class="form-control" id="level_nama" name="level_nama" value="{{ old('level_nama') }}" required>
+                    @error('level_nama')
+                    <small class="form-text text-danger">{{ $message }}</small>
+                    @enderror
+                </div>
+            </div>
+            <div class="form-group row">
+                <label class="col-1 control-label col-form-label"></label>
+                <div class="col-11">
+                    <button type="submit" class="btn btn-primary btn-sm">Simpan</button>
+                    <a class="btn btn-sm btn-default ml-1" href="{{ url('level') }}">Kembali</a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+@if ($errors->any())
+                <div class="alert alert-danger">
+                    <strong>Whoops!</strong> Ada masalah dengan inputan anda.<br><br>
+                    <ul>
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
 @endsection
+
+@push('css')
+@endpush
+
+@push('js')
+@endpush

@@ -18,12 +18,10 @@ class UserController extends Controller
         'list' => ['Home','User']
        ];
 
-       $page = (object)[
-        'title' => 'Daftar user yang terdaftar dalam sistem'
-       ];
+       $page = (object)['title' => 'Daftar user yang terdaftar dalam sistem'];
 
        $activeMenu = 'user'; // set menu yang sedang aktif
-       $level = LevelModel::all(); // ambil data leveluntuk filter level
+       $level = LevelModel::all(); // ambil data level untuk filter level
 
        return view('user.index', ['breadcrumb' => $breadcrumb, 'page' => $page, 'level' => $level, 'activeMenu' => $activeMenu]);
     }
@@ -44,8 +42,7 @@ class UserController extends Controller
         ->addColumn('aksi', function ($user) { // menambahkan kolom aksi
         $btn = '<a href="'.url('/user/' . $user->user_id).'" class="btn btn-info btn-sm">Detail</a> ';
         $btn .= '<a href="'.url('/user/' . $user->user_id . '/edit').'" class="btn btn-warning btn-sm">Edit</a> ';
-        $btn .= '<form class="d-inline-block" method="POST" action="'. url('/user/'.$user->user_id).'">'
-            . csrf_field() . method_field('DELETE') . 
+        $btn .= '<form class="d-inline-block" method="POST" action="'. url('/user/'.$user->user_id).'">'. csrf_field() . method_field('DELETE') . 
             '<button type="submit" class="btn btn-danger btn-sm" onclick="return confirm(\'Apakah Anda yakin menghapus data ini?\');">Hapus</button></form>'; 
         return $btn;
         })
@@ -60,9 +57,7 @@ class UserController extends Controller
             'title' => 'Tambah User',
             'list' => ['Home', 'User', 'Tambah']
         ];
-        $page = (object) [
-            'title' => 'Tambah user baru'
-        ];
+        $page = (object) ['title' => 'Tambah User Baru'];
 
         $level = LevelModel::all(); //ambil data level untuk ditampilkan di form
         $activeMenu = 'user';   //set menu yg sdg aktif
@@ -74,7 +69,7 @@ class UserController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'username' => 'required|string|min:3|unique:m_user,username',
+            'username' => 'required|string|min:2|unique:m_user,username',
             'nama' => 'required|string|max:100',
             'password' => 'required|string|min:5',
             'level_id' => 'required|integer'
@@ -87,7 +82,7 @@ class UserController extends Controller
             'level_id' => $request->level_id,
         ]);
 
-        return redirect('/user')->with('success', 'Data user berhasil disimpan');
+        return redirect('/user')->with("success", "Data user berhasil disimpan");
     }
 
     //Menampilkan detail user
@@ -98,9 +93,7 @@ class UserController extends Controller
             'title' => 'Detail User',
             'list' => ['Home', 'User', 'Detail']
         ];
-        $page = (object) [
-            'title' => 'Detail user'
-        ];
+        $page = (object) ['title' => 'Detail User'];
         $activeMenu = 'user';   //set menu yg sdg aktif
 
         return view('user.show', ['breadcrumb' => $breadcrumb, 'page' => $page, 'user' => $user, 'activeMenu' => $activeMenu]);
@@ -115,7 +108,7 @@ class UserController extends Controller
             'title' => 'Edit User',
             'list' => ['Home', 'User', 'Edit']
         ];
-        $page = (object)['title' => 'Edit user 1'];
+        $page = (object)['title' => 'Edit User'];
         $activeMenu = 'user'; // set menu yang sedang aktif
 
         return view('user.edit', [
@@ -131,7 +124,7 @@ class UserController extends Controller
     public function update(Request $request, string $id)
     {
         $request->validate([
-            'username' => 'required|string|min:3|unique:m_user,username,' . $id . ',user_id',
+            'username' => 'required|string|min:2|unique:m_user,username,' . $id . ',user_id',
             'nama' => 'required|string|max:100',
             'password' => 'nullable|min:5',
             'level_id' => 'required|integer'
@@ -163,48 +156,4 @@ class UserController extends Controller
             return redirect('/user')->with('error', 'Data user gagal dihapus karena masih terdapat tabel lain yang terkait dengan data ini');
         }
     }
-
-
-    // public function tambah()
-    // {
-    //     return view('user_tambah');
-    // }
-
-    // public function tambah_simpan(StorePostRequest $request)
-    // {
-    //     UserModel::create([
-    //         'username' => $request->username,
-    //         'nama' => $request->nama,
-    //         'password' => Hash::make($request->password),
-    //         'level_id' => $request->level_id,
-    //     ]);
-
-    //     $validated = $request->validate();
-    //         $validated = $request->safe()->only(['level_id','username', 'nama', 'password' ]);
-    //         $validated=$request->safe()->except(['level_id','username', 'nama', 'password' ]);
-
-    //     return redirect('/user');
-    // }
-
-    // public function ubah($id)
-    // {
-    //     $user = UserModel::find($id);
-    //     return view('user_ubah', ['data' => $user]);
-    // }
-    // public function ubah_simpan($id, Request $request)
-    // {
-    //     $user = UserModel::find($id);
-    //     $user->username = $request->username;
-    //     $user->nama = $request->nama;
-    //     $user->password = Hash::make($request->password); // Remove the quotation marks
-    //     $user->level_id = $request->level_id;
-    //     $user->save();
-    //     return redirect('/user');
-    // }
-    // public function hapus($id)
-    // {
-    //     $user = UserModel::find($id);
-    //     $user->delete();
-    //     return redirect('/user');
-    // }
 }

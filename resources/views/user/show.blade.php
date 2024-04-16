@@ -13,28 +13,30 @@
             Data yang Anda cari tidak ditemukan.
         </div>
         @else
-        <table class="table table-bordered table-striped table-hover table-sm">
-            <tr>
-                <th>ID</th>
-                <td>{{ $user->user_id }}</td>
-            </tr>
-            <tr>
-                <th>Level</th>
-                <td>{{ $user->level->level_nama }}</td>
-            </tr>
-            <tr>
-                <th>Username</th>
-                <td>{{ $user->username }}</td>
-            </tr>
-            <tr>
-                <th>Nama</th>
-                <td>{{ $user->nama }}</td>
-            </tr>
-            <tr>
-                <th>Password</th>
-                <td>********</td>
-            </tr>
-        </table>
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped table-hover table-sm">
+                <tr>
+                    <th style="width: 20%">ID</th>
+                    <td>{{ $user->user_id }}</td>
+                </tr>
+                <tr>
+                    <th>Level</th>
+                    <td>{{ $user->level->level_nama }}</td>
+                </tr>
+                <tr>
+                    <th>Username</th>
+                    <td>{{ $user->username }}</td>
+                </tr>
+                <tr>
+                    <th>Nama</th>
+                    <td>{{ $user->nama }}</td>
+                </tr>
+                <tr>
+                    <th>Password</th>
+                    <td>********</td>
+                </tr>
+            </table>
+        </div>
         @endempty
         <a href="{{ url('user') }}" class="btn btn-sm btn-default mt-2">Kembali</a>
     </div>

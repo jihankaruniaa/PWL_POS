@@ -9,8 +9,10 @@
             </div>
         </div>
         <div class="card-body">
-            @if (@session('success'))
-                <div class="alert alert-success">{{session('succes')}}</div>
+            @if(session('success'))
+                <div class="alert alert-success">
+                    {{ session('success') }}
+                </div>
             @endif
             @if (@session('error'))
                 <div class="alert alert-danger">{{session('error')}}</div>
@@ -26,14 +28,20 @@
                                     <option value="{{$item->level_id}}">{{$item->level_nama}}</option>
                                 @endforeach
                             </select>
-                            <small class="form-text text-muted">Level Pengguna</small>
+                            <small class="form-text text-muted">user</small>
                         </div>
                     </div>
                 </div>
             </div>
             <table class="table table-bordered table-striped table-hover table-sm" id="table_user">
                 <thead>
-                    <tr><th>ID</th><th>Username</th><th>Nama</th><th>Level Pengguna</th><th>Aksi</th></tr>
+                    <tr>
+                        <th>ID</th>
+                        <th>Username</th>
+                        <th>Nama</th>
+                        <th>Level Pengguna</th>
+                        <th>Aksi</th>
+                    </tr>
                 </thead>
             </table>
         </div>
