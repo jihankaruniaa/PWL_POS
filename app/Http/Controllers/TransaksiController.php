@@ -59,80 +59,95 @@ class TransaksiController extends Controller
         $page = (object) ['title' => 'Tambah Transaksi Penjualan Baru'];
         $user = UserModel::all(); //ambil data user untuk ditampilkan di form
         $barang = BarangModel::all();
+
+        // Get the latest transaction, if available
+        $latestTransaction = TransaksiModel::latest()->first();
+
+        // If there are no existing transactions, set the next transaction number to 1
+        if ($latestTransaction) {
+            // Ambil nomor urut dari kode penjualan terakhir
+            $lastTransactionNumber = intval(substr($latestTransaction->penjualan_kode, 2));
+        } else {
+            $lastTransactionNumber = 0;
+        }
+
+        // Tambahkan 1 ke nomor urut terakhir untuk mendapatkan nomor urut berikutnya
+        $nextTransactionNumber = $lastTransactionNumber + 1;
+
+        // Format kode penjualan dengan awalan "PJ" dan nomor urut berikutnya
+        $penjualan_kode = "PJ" . $nextTransactionNumber;
+
         $activeMenu = 'penjualan'; // set menu yang sedang aktif
-        return view('transaksi.create', ['breadcrumb' => $breadcrumb, 'page' => $page, 'barang' => $barang, 'user'=>$user, 'activeMenu' => $activeMenu]);
+        return view('transaksi.create', ['breadcrumb' => $breadcrumb, 'page' => $page, 'barang' => $barang, 'user'=>$user, 'penjualan_kode' => $penjualan_kode, 'activeMenu' => $activeMenu]);
     }
 
     public function store(Request $request)
-{
-    $request->validate([
-        'penjualan_kode'    => 'required|string|min:3|unique:t_penjualan,penjualan_kode',
-        'user_id'           => 'required|integer',
-        'pembeli'           => 'required|string|max:100',
-        'penjualan_tanggal' => 'required|date_format:Y-m-d\TH:i',
-        'barang.*.id'       => 'required|integer', 
-        'barang.*.jumlah'   => 'required|integer|min:1'
-    ]);
-
-    try {
-        // Mulai transaksi database
-        DB::beginTransaction();
-
-        // Buat transaksi penjualan
-        $penjualan = TransaksiModel::create([
-            'penjualan_kode'   => $request->penjualan_kode,
-            'user_id'          => $request->user_id,
-            'pembeli'          => $request->pembeli,
-            'penjualan_tanggal'=> $request->penjualan_tanggal
+    {
+        $request->validate([
+            'user_id'           => 'required|integer',
+            'pembeli'           => 'required|string|max:100',
+            'barang.*.id'       => 'required|integer', 
+            'barang.*.jumlah'   => 'required|integer|min:1'
         ]);
 
-        // Simpan detail transaksi untuk setiap barang yang dipilih
-        foreach ($request->barang as $item) {
-            $barang = BarangModel::findOrFail($item['id']);
-            
-            // Cek stok barang
-            if ($item['jumlah'] > $barang->stok) {
-                throw new \Exception('Stok barang '.$barang->nama.' tidak mencukupi');
-            }
-
-            // Buat detail transaksi
-            $harga = $barang->harga_jual;
-            DetailPenjualanModel::create([
-                'penjualan_id' => $penjualan->penjualan_id,
-                'barang_id'    => $item['id'],
-                'harga'        => $harga,
-                'jumlah'       => $item['jumlah']
+        try {
+            // Mulai transaksi database
+            DB::beginTransaction();
+    
+            // Buat transaksi penjualan
+            $penjualan = TransaksiModel::create([
+                'penjualan_kode'   => $request->penjualan_kode,
+                'user_id'          => $request->user_id,
+                'pembeli'          => $request->pembeli,
+                'penjualan_tanggal'=> $request->penjualan_tanggal
             ]);
-
-            // Kurangi stok barang
-            $stokBarang = $barang->stok()->first(); // Ambil objek stok pertama
-            if ($item['jumlah'] > $stokBarang->stok_jumlah) {
-                throw new \Exception('Stok barang '.$barang->nama.' tidak mencukupi');
+    
+            // Simpan detail transaksi untuk setiap barang yang dipilih
+            foreach ($request->barang as $item) {
+                $barang = BarangModel::findOrFail($item['id']);
+                
+                // Cek stok barang
+                if ($item['jumlah'] > $barang->stok) {
+                    throw new \Exception('Stok barang '.$barang->barang_nama.' tidak mencukupi');
+                }
+    
+                // Buat detail transaksi
+                $harga = $barang->harga_jual;
+                DetailPenjualanModel::create([
+                    'penjualan_id' => $penjualan->penjualan_id,
+                    'barang_id'    => $item['id'],
+                    'harga'        => $harga,
+                    'jumlah'       => $item['jumlah']
+                ]);
+    
+                // Kurangi stok barang
+                $stokBarang = $barang->stok()->first(); // Ambil objek stok pertama
+                if ($item['jumlah'] > $stokBarang->stok_jumlah) {
+                    throw new \Exception('Stok barang '.$barang->nama.' tidak mencukupi');
+                }
+    
+                $stokBarang->stok_jumlah -= $item['jumlah']; // Kurangi stok
+                $stokBarang->save(); // Simpan perubahan stok
+    
             }
-
-            $stokBarang->stok_jumlah -= $item['jumlah']; // Kurangi stok
-            $stokBarang->save(); // Simpan perubahan stok
-
+    
+            // Commit transaksi database
+            DB::commit();
+    
+            return redirect('/transaksi')->with('success','Data transaksi penjualan berhasil disimpan');
+        } catch (\Exception $e) {
+            // Rollback transaksi database jika terjadi kesalahan
+            DB::rollback();
+            return redirect('/transaksi')->with('error', $e->getMessage());
         }
-
-        // Commit transaksi database
-        DB::commit();
-
-        return redirect('/transaksi')->with('success','Data transaksi penjualan berhasil disimpan');
-    } catch (\Exception $e) {
-        // Rollback transaksi database jika terjadi kesalahan
-        DB::rollback();
-        return redirect('/transaksi/create')->with('error', $e->getMessage());
     }
-}
-
 
     public function show(string $id)
     {
         $transaksi = TransaksiModel::with('user')->find($id);
         $user = UserModel::all();
         $barang = BarangModel::all();
-        $detail = DetailPenjualanModel::all();
+        $detail = DetailPenjualanModel::where('penjualan_id', $id)->with('barang')->get();
 
         $breadcrumb = (object) [
             'title' => 'Detail Transaksi Penjualan',
@@ -159,7 +174,8 @@ class TransaksiController extends Controller
         ];
         $page = (object)['title' => 'Edit Transaksi Penjualan '];
         $activeMenu = 'penjualan'; // set menu yang sedang aktif
-        return view('transaksi.edit', ['breadcrumb' => $breadcrumb, 'page' => $page, 'penjualan' => $transaksi, 'user'=>$user,'barang'=>$barang, 'detail'=>$detail, 'activeMenu' => $activeMenu]);    }
+        return view('transaksi.edit', ['breadcrumb' => $breadcrumb, 'page' => $page, 'penjualan' => $transaksi, 'user'=>$user,'barang'=>$barang, 'detail'=>$detail, 'activeMenu' => $activeMenu]);    
+    }
 
 
     public function update(Request $request, string $id)
@@ -187,25 +203,25 @@ class TransaksiController extends Controller
         $check = TransaksiModel::find($id);
         if(!$check){ //untuk mengecek apakah data penjualan dengan id yang dimaksud ada atau tidak
         return redirect('/transaksi')->with('error', 'Data penjualan tidak ditemukan');
-    }
-    try {
-        // Hapus detail penjualan terlebih dahulu
-        DetailPenjualanModel::where('penjualan_id', $id)->delete();
-        
-        // Hapus data penjualan
-        $penjualan = TransaksiModel::find($id);
-        if (!$penjualan) {
-            return redirect('/transaksi')->with('error', 'Data transaksi penjualan tidak ditemukan');
         }
-        $penjualan->delete();
+        try {
+            // Hapus detail penjualan terlebih dahulu
+            DetailPenjualanModel::where('penjualan_id', $id)->delete();
+            
+            // Hapus data penjualan
+            $penjualan = TransaksiModel::find($id);
+            if (!$penjualan) {
+                return redirect('/transaksi')->with('error', 'Data transaksi penjualan tidak ditemukan');
+            }
+            $penjualan->delete();
 
-        DB::commit();
+            DB::commit();
 
-        return redirect('/transaksi')->with('success', 'Data transaksi penjualan berhasil dihapus');
-    } catch (\Exception $e) {
-        DB::rollback();
+            return redirect('/transaksi')->with('success', 'Data transaksi penjualan berhasil dihapus');
+        } catch (\Exception $e) {
+            DB::rollback();
 
-        return redirect('/transaksi')->with('error', 'Gagal menghapus data transaksi penjualan: ' . $e->getMessage());
-    }
+            return redirect('/transaksi')->with('error', 'Gagal menghapus data transaksi penjualan: ' . $e->getMessage());
+        }
     } 
 }

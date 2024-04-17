@@ -16,37 +16,55 @@
                 <table class="table table-bordered table-striped table-hover table-sm">
                     <tr>
                         <th>ID</th>
-                        <td>{{ $penjualan->penjualan_id }}</td>
+                        <td colspan="3">{{ $penjualan->penjualan_id }}</td>
                     </tr>
                     <tr>
                         <th>User</th>
-                        <td>{{ $penjualan->user->nama }}</td>
+                        <td colspan="3">{{ $penjualan->user->nama }}</td>
                     </tr>
                     <tr>
                         <th>Pembeli</th>
-                        <td>{{ $penjualan->pembeli }}</td>
+                        <td colspan="3">{{ $penjualan->pembeli }}</td>
                     </tr>
                     <tr>
                         <th>Kode penjualan</th>
-                        <td>{{ $penjualan->penjualan_kode }}</td>
+                        <td colspan="3">{{ $penjualan->penjualan_kode }}</td>
                     </tr>
                         <th>Tanggal Pembelian</th>
-                        <td>{{ $penjualan->penjualan_tanggal}}</td>
+                        <td colspan="3">{{ $penjualan->penjualan_tanggal}}</td>
                     </tr>
                 @if($penjualan->detail->isNotEmpty())
                         <tr>
                             <th>Jumlah</th>
-                            <td>{{ $penjualan->detail->sum('jumlah')}}</td>
+                            <td colspan="3">{{ $penjualan->detail->sum('jumlah')}}</td>
                         </tr>
                         <tr>
-                            <th colspan="2">Detail Barang</th>
+                            <th class="text-center" colspan="4">Detail Barang</th>
                         </tr>
-                        @foreach($penjualan->detail as $detail)
+                        <tr>
+                            <th>Nama Barang</th>
+                            <th>Jumlah</th>
+                            <th>Harga Satuan</th>
+                            <th>Jumlah Harga</th>
+                        </tr>
+                        @php
+                            $totalPrice = 0;
+                        @endphp
+                        @foreach($penjualan->detail as $item)
                             <tr>
-                                <td>{{ $detail->barang->barang_nama }}</td>
-                                <td>{{ $detail->jumlah }}</td>
+                                <td>{{ $item->barang->barang_nama }}</td>
+                                <td>{{ $item->jumlah }}</td>
+                                <td>{{ $item->barang->harga_jual }}</td>
+                                <td>{{ $jumlahHarga = $item->jumlah * $item->barang->harga_jual}}</td>
                             </tr>
+                            @php
+                                $totalPrice += $jumlahHarga;
+                            @endphp
                         @endforeach
+                        <tr>
+                            <th class="text-center" colspan="3">TOTAL BAYAR</th>
+                            <td>{{ $totalPrice }}</td>
+                        </tr>
                     @endif
                 </table>
             @endempty
