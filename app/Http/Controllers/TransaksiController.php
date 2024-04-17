@@ -43,7 +43,7 @@ class TransaksiController extends Controller
         ->addIndexColumn()
         ->addColumn('aksi', function ($tran) { // menambahkan kolom aksi
             $btn = '<a href="'.url('/transaksi/' . $tran->penjualan_id).'" class="btn btn-info btn-sm">Detail</a> ';
-            $btn .= '<a href="'.url('/transaksi/' . $tran->penjualan_id . '/edit').'" class="btn btn-warning btn-sm">Edit</a> ';
+            //$btn .= '<a href="'.url('/transaksi/' . $tran->penjualan_id . '/edit').'" class="btn btn-warning btn-sm">Edit</a> ';
             $btn .= '<form class="d-inline-block" method="POST" action="'.url('/transaksi/'.$tran->penjualan_id).'">'. csrf_field() . method_field('DELETE') .
                     '<button type="submit" class="btn btn-danger btn-sm" onclick="return confirm(\'Apakah Anda yakin menghapus data ini?\');">Hapus</button></form>';
             return $btn;
@@ -64,15 +64,21 @@ class TransaksiController extends Controller
     }
 
     public function store(Request $request)
-    {
-        $request->validate([
-            'penjualan_kode'   => 'required|string|min:3|unique:t_penjualan,penjualan_kode',
-            'user_id'          => 'required|integer',
-            'pembeli'          => 'required|string|max:100',
-            'penjualan_tanggal'=> 'required|date_format:Y-m-d\TH:i',
-            'barang_id'        => 'required|integer',
-            'jumlah'           => 'required|integer'
-        ]);
+{
+    $request->validate([
+        'penjualan_kode'    => 'required|string|min:3|unique:t_penjualan,penjualan_kode',
+        'user_id'           => 'required|integer',
+        'pembeli'           => 'required|string|max:100',
+        'penjualan_tanggal' => 'required|date_format:Y-m-d\TH:i',
+        'barang.*.id'       => 'required|integer', 
+        'barang.*.jumlah'   => 'required|integer|min:1'
+    ]);
+
+    try {
+        // Mulai transaksi database
+        DB::beginTransaction();
+
+        // Buat transaksi penjualan
         $penjualan = TransaksiModel::create([
             'penjualan_kode'   => $request->penjualan_kode,
             'user_id'          => $request->user_id,
@@ -80,21 +86,46 @@ class TransaksiController extends Controller
             'penjualan_tanggal'=> $request->penjualan_tanggal
         ]);
 
-        //detail penjualan
-        $barang = BarangModel::findOrFail($request->barang_id);
-        $harga = $barang->harga_jual;
-        $penjualan_id = $penjualan->penjualan_id;
+        // Simpan detail transaksi untuk setiap barang yang dipilih
+        foreach ($request->barang as $item) {
+            $barang = BarangModel::findOrFail($item['id']);
+            
+            // Cek stok barang
+            if ($item['jumlah'] > $barang->stok) {
+                throw new \Exception('Stok barang '.$barang->nama.' tidak mencukupi');
+            }
 
-        DetailPenjualanModel::create([
-            'penjualan_id'=> $penjualan_id,
-            'barang_id'   => $request->barang_id,
-            'harga'      => $harga,
-            'jumlah'     => $request->jumlah
-        ]);
+            // Buat detail transaksi
+            $harga = $barang->harga_jual;
+            DetailPenjualanModel::create([
+                'penjualan_id' => $penjualan->penjualan_id,
+                'barang_id'    => $item['id'],
+                'harga'        => $harga,
+                'jumlah'       => $item['jumlah']
+            ]);
 
+            // Kurangi stok barang
+            $stokBarang = $barang->stok()->first(); // Ambil objek stok pertama
+            if ($item['jumlah'] > $stokBarang->stok_jumlah) {
+                throw new \Exception('Stok barang '.$barang->nama.' tidak mencukupi');
+            }
+
+            $stokBarang->stok_jumlah -= $item['jumlah']; // Kurangi stok
+            $stokBarang->save(); // Simpan perubahan stok
+
+        }
+
+        // Commit transaksi database
+        DB::commit();
 
         return redirect('/transaksi')->with('success','Data transaksi penjualan berhasil disimpan');
+    } catch (\Exception $e) {
+        // Rollback transaksi database jika terjadi kesalahan
+        DB::rollback();
+        return redirect('/transaksi/create')->with('error', $e->getMessage());
     }
+}
+
 
     public function show(string $id)
     {
