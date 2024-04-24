@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use App\Models\LevelModel;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class UserModel extends Model
+class UserModel extends \Illuminate\Foundation\Auth\User
 {
     use HasFactory;
 
