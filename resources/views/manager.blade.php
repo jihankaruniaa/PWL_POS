@@ -2,7 +2,7 @@
 
 {{-- Customize layout sections --}}
 
-@section('subtitle', 'Admin')
+@section('subtitle', 'Manager')
 @section('content_header_title', 'Home')
 @section('content_header_subtitle', 'Manager')
 
