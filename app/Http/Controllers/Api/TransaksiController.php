@@ -28,7 +28,7 @@ class TransaksiController extends Controller
                 'Harga' => $item->harga,
                 'Jumlah' => $item->jumlah,
                 'Subtotal' => $subtotal,
-                'Image' => url('storage/posts/' . $barang->image->hashName()),
+                'Image' => url('storage/posts/' . $barang->image),
             ];
             $response['Total Belanja'] += $subtotal;
         }
