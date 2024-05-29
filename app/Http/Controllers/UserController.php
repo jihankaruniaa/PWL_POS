@@ -29,7 +29,7 @@ class UserController extends Controller
     // Ambil data user dalam bentuk json untuk datatables
     public function list(Request $request)
     {
-        $users = UserModel::select('user_id', 'username', 'nama', 'level_id')
+        $users = UserModel::select('user_id', 'username', 'nama', 'level_id', 'image')
                         ->with('level');
 
         //Filter data userberdasarkan level_id
@@ -72,14 +72,23 @@ class UserController extends Controller
             'username' => 'required|string|min:2|unique:m_user,username',
             'nama' => 'required|string|max:100',
             'password' => 'required|string|min:5',
-            'level_id' => 'required|integer'
+            'level_id' => 'required|integer',
+            'image' => 'required|file|image|max:2048'
         ]);
+
+        $extfile = $request->image->getClientOriginalName();
+        $namaFile = 'web-' . time() . "." . $extfile;
+
+        $path = $request->image->move('gbrStarterCode', $namaFile);
+        $path = str_replace("\\", "//", $path);
+        $pathBaru = asset('gbrStarterCode/' . $namaFile);
 
         UserModel::create([
             'username' => $request->username,
             'nama' => $request->nama,
             'password' => bcrypt($request->password),
             'level_id' => $request->level_id,
+            'image' => $pathBaru
         ]);
 
         return redirect('/user')->with("success", "Data user berhasil disimpan");
@@ -127,14 +136,23 @@ class UserController extends Controller
             'username' => 'required|string|min:2|unique:m_user,username,' . $id . ',user_id',
             'nama' => 'required|string|max:100',
             'password' => 'nullable|min:5',
-            'level_id' => 'required|integer'
+            'level_id' => 'required|integer',
+            'image' => 'required|file|image|max:2048'
         ]);
+
+        $extfile = $request->image->getClientOriginalName();
+        $namaFile = 'web-' . time() . "." . $extfile;
+
+        $path = $request->image->move('gbrStarterCode', $namaFile);
+        $path = str_replace("\\", "//", $path);
+        $pathBaru = asset('gbrStarterCode/' . $namaFile);
 
         $user = UserModel::find($id);
         $user->username = $request->username;
         $user->nama = $request->nama;
         $user->password = $request->password ? bcrypt($request->password) : $user->password;
         $user->level_id = $request->level_id;
+        $user->image = $pathBaru;
         $user->save();
 
         return redirect('/user')->with("success", "Data user berhasil diubah");

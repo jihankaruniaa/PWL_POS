@@ -42,10 +42,10 @@ class UserModel extends Authenticatable implements JWTSubject
         return $this->hasMany(TransaksiModel::class, 'user_id', 'user_id');
     }
 
-    protected function image(): Attribute
-    {
-        return Attribute::make(
-            get: fn ($image) => url('/storage/posts/' . $image),
-        );
-    }
+    // protected function image(): Attribute
+    // {
+    //     return Attribute::make(
+    //         get: fn ($image) => url('/storage/posts/' . $image),
+    //     );
+    // }
 }

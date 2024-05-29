@@ -40,9 +40,7 @@
                     </tr>
                     <tr>
                         <th>Gambar</th>
-                        <td>
-                            <img src="{{ asset($barang->image) }}" alt="{{ $barang->barang_nama }}" class="img-thumbnail" width="100">
-                        </td>
+                        <td><img src="{{ $barang->image }}" alt="Gambar" width="100"></td>
                     </tr>
                 </table>
             @endempty

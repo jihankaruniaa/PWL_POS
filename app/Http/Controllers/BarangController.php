@@ -22,7 +22,7 @@ class BarangController extends Controller
     }
 
     public function list(Request $request){
-        $barangs = BarangModel::select('barang_id', 'barang_kode', 'barang_nama','harga_beli', 'harga_jual', 'kategori_id')->with('kategori');
+        $barangs = BarangModel::select('barang_id', 'barang_kode', 'barang_nama','harga_beli', 'harga_jual', 'kategori_id', 'image')->with('kategori');
 
         //Filter berdasarkan level_id
         if($request->kategori_id){
@@ -58,15 +58,24 @@ class BarangController extends Controller
             'barang_nama' => 'required|string|max:100',
             'harga_beli' => 'required|integer',
             'harga_jual' => 'required|integer',
-            'kategori_id' => 'required|integer'
+            'kategori_id' => 'required|integer',
+            'image' => 'required|file|image|max:2048'
         ]);
         
+        $extfile = $request->image->getClientOriginalName();
+        $namaFile = 'web-' . time() . "." . $extfile;
+
+        $path = $request->image->move('gbrStarterCode', $namaFile);
+        $path = str_replace("\\", "//", $path);
+        $pathBaru = asset('gbrStarterCode/' . $namaFile);
+
         BarangModel::create([
             'barang_kode' => $request->barang_kode,
             'barang_nama' => $request->barang_nama,
             'harga_beli' => $request->harga_beli,
             'harga_jual' => $request->harga_jual,
-            'kategori_id' => $request->kategori_id
+            'kategori_id' => $request->kategori_id,
+            'image' => $pathBaru
         ]);
         return redirect('/barang')->with('success', 'Data barang berhasil disimpan');
     }
@@ -105,8 +114,16 @@ class BarangController extends Controller
             'barang_nama' => 'required|string|max:100',
             'harga_beli' => 'required',
             'harga_jual' => 'required',
-            'kategori_id' => 'required|integer'
+            'kategori_id' => 'required|integer',
+            'image' => 'required|file|image|max:2048'
         ]);
+
+        $extfile = $request->image->getClientOriginalName();
+        $namaFile = 'web-' . time() . "." . $extfile;
+
+        $path = $request->image->move('gbrStarterCode', $namaFile);
+        $path = str_replace("\\", "//", $path);
+        $pathBaru = asset('gbrStarterCode/' . $namaFile);
 
         $barang = BarangModel::find($id);
         $barang->update([
@@ -114,7 +131,8 @@ class BarangController extends Controller
             'barang_nama' => $request->barang_nama,
             'harga_beli' => $request->harga_beli,
             'harga_jual' => $request->harga_jual,
-            'kategori_id' => $request->kategori_id
+            'kategori_id' => $request->kategori_id,
+            'image' => $pathBaru
         ]);
 
         return redirect('/barang')->with('success', 'Data barang berhasil diubah');
